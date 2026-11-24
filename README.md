@@ -101,6 +101,25 @@ Large files, as a batch job on one Arrhenius node:
 
   `HICHAN` the HiCHAN restart (without extension), `OUT` the FDCHAN file (default `restart_fdchan.bin` next to
   it), `NZ`, `NX` (default: as HiCHAN), `PREC=single` for fdchan_sp, `NSCAL`.
+* `examples/arrhenius_f2h.sh`: FDCHAN (single or double precision) → HiCHAN. Checks the input, an even output nz
+  and the free disk space, converts (printing the dropped Nyquist energy), and prints the `&grid`, `&init` and
+  `&scalars` lines for the HiCHAN input file:
+
+  ```bash
+  sbatch -A <your-account> --export=ALL,FDCHAN=/scratch/geert/fd_run/data/restart.bin,NZ=1920,DT=1.5e-3 $HOME/converter/examples/arrhenius_f2h.sh
+  ```
+
+  `FDCHAN` the FDCHAN file, `OUT` the HiCHAN restart name (default `restart_hichan` next to it), `NZ` (even),
+  `NX`, `NSCAL`, and for the HiCHAN header `STEP` (default 0), `DT` (default 1e-3; HiCHAN's first time step),
+  `GRID` (default `"tanh 4.5 8"`: grid_type grid_alpha fd_order).
+* `examples/arrhenius_f2f.sh`: FDCHAN single ↔ double precision (optionally another nx, nz):
+
+  ```bash
+  sbatch -A <your-account> --export=ALL,IN=/scratch/geert/fd_sp/data/restart.bin $HOME/converter/examples/arrhenius_f2f.sh
+  ```
+
+  `IN` the FDCHAN file, `PREC` the output precision (default `double`; `single` for fdchan_sp), `OUT` (default
+  `restart_double.bin` / `restart_single.bin` next to it), `NZ`, `NX`, `NSCAL`.
 * `examples/arrhenius_convert.sh`: any conversion (edit its last lines).
 Speed: about 0.2 GB/s on 4 cores (compute bound); on a 72-core node the file system sets the speed, a few minutes
 for a 2560 × 385 × 1920 restart with one scalar (76 GB).
