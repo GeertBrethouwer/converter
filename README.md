@@ -89,8 +89,19 @@ FDCHAN single precision (`fdchan_sp`) → double precision, and back:
 ./rsconv f2f restart_dp.bin restart_sp.bin --single
 ```
 
-Large files: `examples/arrhenius_convert.sh` runs a conversion as a batch job on one node
-(`sbatch -A <your-account> $HOME/converter/examples/arrhenius_convert.sh`, after editing its last lines).
+Large files, as a batch job on one Arrhenius node:
+
+* `examples/arrhenius_h2f.sh`: HiCHAN → FDCHAN. Checks the input and the free disk space, converts, and prints
+  the lines for the FDCHAN input file (nx, ny, nz, lx, lz, grid, nscal, `init_type = restart`, `restart_file`).
+  Settings as variables at the top or on the command line:
+
+  ```bash
+  sbatch -A <your-account> --export=ALL,HICHAN=/scratch/geert/run/data/restart,NZ=2688 $HOME/converter/examples/arrhenius_h2f.sh
+  ```
+
+  `HICHAN` the HiCHAN restart (without extension), `OUT` the FDCHAN file (default `restart_fdchan.bin` next to
+  it), `NZ`, `NX` (default: as HiCHAN), `PREC=single` for fdchan_sp, `NSCAL`.
+* `examples/arrhenius_convert.sh`: any conversion (edit its last lines).
 Speed: about 0.2 GB/s on 4 cores (compute bound); on a 72-core node the file system sets the speed, a few minutes
 for a 2560 × 385 × 1920 restart with one scalar (76 GB).
 
