@@ -1,4 +1,10 @@
-# converter: restart files between HiCHAN and FDCHAN
+# converter: restart files between HiCHAN and FDCHAN, and their spectra
+
+Two programs:
+
+* `rsconv`: conversion of restart files (below);
+* `rsspec`: streamwise, spanwise and two-dimensional spectra of the velocities and scalars from restart files of
+  either code (section [Spectra](#spectra-rsspec)).
 
 `rsconv` converts restart files
 
@@ -19,7 +25,7 @@ cd $HOME/converter
 make
 ```
 
-This gives `./rsconv`. With another compiler: `make CXX=clang++` (or `CXX=nvc++` from the NVIDIA HPC SDK
+This gives `./rsconv` and `./rsspec`. With another compiler: `make CXX=clang++` (or `CXX=nvc++` from the NVIDIA HPC SDK
 module).
 
 Tests (CPU, seconds; needs python3 with numpy):
@@ -124,6 +130,68 @@ Large files, as a batch job on one Arrhenius node:
 Speed: about 0.2 GB/s on 4 cores (compute bound); on a 72-core node the file system sets the speed, a few minutes
 for a 2560 × 385 × 1920 restart with one scalar (76 GB).
 
+## Spectra (`rsspec`)
+
+```bash
+./rsspec --yplus 5,15,30,100,200 --retau 1000 --grid tanh 4.5 --sym --out spectra  data/restart.bin  [more files ...]
+```
+
+reads the y-planes at the chosen positions of all fields (u, v, w, the scalars) from HiCHAN or FDCHAN restart files
+(also mixed, single or double precision; same nx, ny, nz, lx, lz) and writes, per position, into `--out`:
+
+| file | contents |
+|---|---|
+| `spec_x_jNNNN.dat` | kx, λx, then Ex(kx) of every field |
+| `spec_z_jNNNN.dat` | kz, λz, then Ez(kz) of every field |
+| `spec_2d_jNNNN.dat` | kx, kz, λx, λz, then E2(kx, kz) of every field; a block per kx (gnuplot `splot`; numpy: `reshape(nx/2, nz/2+1, -1)`) |
+| `summary.dat` | j, y, y⁺, the variance ⟨f′f′⟩ and the mean of every field per position |
+
+The header of each file gives j, y, y⁺, the times of the samples and the variance of every field.
+
+Definitions (f′ = f minus its x-z mean at that y; one-sided spectra, kx, kz ≥ 0; densities):
+Σ Ex(kx) Δkx = Σ Ez(kz) Δkz = Σ E2(kx, kz) Δkx Δkz = ⟨f′f′⟩, with Δkx = 2π/lx, Δkz = 2π/lz. From the Fourier
+coefficients c: E2 Δkx Δkz = a_i (|c(i, m)|² + |c(i, −m)|²), a₀ = 1, a_i = 2 for kx > 0; the kz Nyquist mode of an
+even nz counted once; the mean (kx = kz = 0) left out. The usual premultiplied spectra are kx Ex, kz Ez and
+kx kz E2 against λ (`tools/plot_spectra.py`).
+
+| option | meaning |
+|---|---|
+| `--yplus a,b,...` | positions in wall units from the bottom wall (needs `--retau`) |
+| `--y a,b,...` | y-values (−1 bottom wall, 0 centre, 1 top wall) |
+| `--j a,b,...` | grid indices (0 = bottom wall) |
+| `--retau R` | Re_τ: for `--yplus` and y⁺ in the output |
+| `--grid TYPE ALPHA` | y-grid of the run (`tanh`, `uniform`, `cosine`); default from a HiCHAN header, needed for FDCHAN files with `--y`/`--yplus` |
+| `--yfile FILE` | y-grid from a file (ny values), e.g. HiCHAN's `grid_file` |
+| `--sym` | average also the mirror points in the upper half (j and ny−1−j) |
+| `--fields u,v,w,s1` | fields (default: all) |
+| `--out DIR` | output directory (default `spectra`) |
+| `--threads N` | threads (default: all cores) |
+
+The nearest grid points are used; the actual y and y⁺ are printed. Several files are averaged (time samples): a
+run overwrites its restart file every `iout_restart` steps, so keep copies for averages (e.g. copy
+`data/restart.bin` to `samples/restart_<step>.bin` after every job of a chain). Only the needed planes are read:
+seconds even for production files.
+
+Plots (python3 with numpy and matplotlib):
+
+```bash
+python3 tools/plot_spectra.py spectra --retau 1000 --utau 0.0500
+```
+
+writes `spectra/spec_1d.png` (premultiplied kx Ex and kz Ez against λx⁺, λz⁺, a panel per field, a line per
+position) and `spectra/spec_2d.png` (premultiplied kx kz E2, contours at 0.125, 0.25, 0.5, 0.75 of the maximum, a
+panel per position and field). `--utau` (= Re_τ/Re for velocities in bulk units) scales the velocity spectra to
+wall units.
+
+On Arrhenius, `examples/arrhenius_spectra.sh` does both as a batch job:
+
+```bash
+sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,RE=20000,GRID="tanh 4.5" $HOME/converter/examples/arrhenius_spectra.sh
+```
+
+with `YPLUS` (default `5,15,30,100,200`; or `Y`, `J`), `SYM` (default 1), `FIELDS`, `OUT` (default `spectra` in
+the submit directory). If python3 with matplotlib is not available on the node it prints the plot command.
+
 ## What the conversion does
 
 Both codes represent a field by its Fourier coefficients in x, f(x, ·) = Σ f̂ exp(i kx x) over kx = 2πi/lx,
@@ -165,6 +233,8 @@ Things to know:
 
 ## Tests
 
+`make test` runs `tests/test_fft`, `tests/test_roundtrip.py` (rsconv) and `tests/test_spectra.py` (rsspec).
+
 | test | result |
 |---|---|
 | `tests/test_fft.cpp`: the FFT against a direct DFT, lengths 1–130, 1920, 2688, 2689 (prime, Bluestein), 2880 | 4e-15 |
@@ -175,3 +245,4 @@ Things to know:
 | headers, `--nscal`, refusing to overwrite | ok |
 | FDCHAN turbulent field (32 × 65 × 48, one scalar, 300 steps) → f2h → HiCHAN (CPU build) | HiCHAN's first log line: τ_w, Re_τ, dS/dy at both walls identical to FDCHAN's last; U_b 1.000007 (Nyquist energy dropped, coarse grid); div_max 0.34, then 1e-14 after one step |
 | HiCHAN turbulent field (same grid, 300 steps) → h2f → FDCHAN | FDCHAN's first log line: U_b, τ_w, Re_τ, dS/dy identical to HiCHAN's last; div_max 7e-15; E_kin within 0.1 % |
+| `tests/test_spectra.py`: rsspec against numpy from the physical field (random HiCHAN file, two scalars) | variance, Ex (FFTs in x), Ez (FFTs in z), E2: to the 9 digits of the output; FDCHAN file of the same field: the same spectra; single precision: 3e-8; two files: their average; `--sym`, `--yplus`, `--y`, the means |

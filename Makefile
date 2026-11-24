@@ -1,19 +1,25 @@
-# make            build ./rsconv (any C++17 compiler; no libraries needed)
-# make test       FFT test and round-trip tests (python3 with numpy)
+# make            build ./rsconv and ./rsspec (any C++17 compiler; no libraries needed)
+# make test       FFT test, round-trip tests and spectra tests (python3 with numpy)
 CXX      ?= g++
 CXXFLAGS ?= -O3 -std=c++17 -Wall -Wextra -pthread
 
-rsconv: src/rsconv.cpp
+all: rsconv rsspec
+
+rsconv: src/rsconv.cpp src/rsio.hpp
 	$(CXX) $(CXXFLAGS) src/rsconv.cpp -o $@
 
-tests/test_fft: tests/test_fft.cpp src/rsconv.cpp
+rsspec: src/rsspec.cpp src/rsio.hpp
+	$(CXX) $(CXXFLAGS) src/rsspec.cpp -o $@
+
+tests/test_fft: tests/test_fft.cpp src/rsconv.cpp src/rsio.hpp
 	$(CXX) $(CXXFLAGS) tests/test_fft.cpp -o $@
 
-test: rsconv tests/test_fft
+test: rsconv rsspec tests/test_fft
 	./tests/test_fft
 	python3 tests/test_roundtrip.py ./rsconv
+	python3 tests/test_spectra.py .
 
 clean:
-	rm -f rsconv tests/test_fft
+	rm -f rsconv rsspec tests/test_fft
 
-.PHONY: test clean
+.PHONY: all test clean

@@ -1,6 +1,6 @@
 // FFT of rsconv against a direct DFT, lengths 1..130 and some production sizes (also Bluestein for large primes)
 #define main rsconv_main
-#include "../src/rsconv.cpp"
+#include "../src/rsconv.cpp"  // (FFT from rsio.hpp)
 #undef main
 #include <random>
 int main() {
