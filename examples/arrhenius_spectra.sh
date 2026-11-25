@@ -11,8 +11,9 @@
 #   sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,GRID="tanh 4.5" \
 #          $HOME/converter/examples/arrhenius_spectra.sh
 #
-# The restart file of a run is overwritten every iout_restart steps: for time averages, keep copies (e.g. copy
-# data/restart.bin to samples/restart_<step>.bin after each job of a chain, or between restarts).
+# Time samples: FDCHAN writes numbered restart files with tout_samples (or iout_samples) in its input, e.g.
+# tout_samples = 5 -> data/samples/restart_t<time>.bin (FILES="<run>/data/samples/restart_t*.bin"). For HiCHAN keep
+# copies of data/restart.bin/.hdr after each job of a chain (its restart file is overwritten).
 #
 #SBATCH -J spectra
 #SBATCH -p gpu
@@ -23,7 +24,7 @@
 #SBATCH -t 01:00:00
 
 # ---- settings
-FILES=${FILES:-"/scratch/geert/fdchan_run/data/restart.bin"}  # restart files (FDCHAN *.bin or HiCHAN <name>); globs work
+FILES=${FILES:-"/scratch/geert/fdchan_run/data/samples/restart_t*.bin"}  # restart files (FDCHAN *.bin or HiCHAN <name>); globs work
 RETAU=${RETAU:-1000}            # friction Reynolds number: positions in wall units, wavelengths in wall units in the plots
 YPLUS=${YPLUS:-"5,15,30,100,200"}  # positions y+ from the wall (or set Y="y1,y2" for y-values, J="j1,j2" for indices)
 Y=${Y:-}
