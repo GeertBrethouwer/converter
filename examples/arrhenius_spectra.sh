@@ -4,12 +4,12 @@
 # FDCHAN restart files on one Arrhenius node, averaged over all given files (time samples) and over both channel
 # halves, and plots of them (if python3 with matplotlib is available).
 #
-# Build once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter.git
-#                            cd converter && make
+# Build once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+#                            cd converter_and_spectra && make
 # Set the variables below (or pass them on the command line), then submit from any directory:
-#   sbatch -A <your-account> $HOME/converter/examples/arrhenius_spectra.sh
+#   sbatch -A <your-account> $HOME/converter_and_spectra/examples/arrhenius_spectra.sh
 #   sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,GRID="tanh 4.5" \
-#          $HOME/converter/examples/arrhenius_spectra.sh
+#          $HOME/converter_and_spectra/examples/arrhenius_spectra.sh
 #
 # Time samples: FDCHAN and HiCHAN (&output) write numbered restart files with tout_samples (or iout_samples), e.g.
 # tout_samples = 5 -> data/samples/restart_t<time>.bin (HiCHAN also .hdr); FILES="<run>/data/samples/restart_t*.bin".
@@ -33,7 +33,7 @@ SYM=${SYM:-1}                   # 1: average over both channel halves
 FIELDS=${FIELDS:-}              # e.g. u,v,w,s1; empty: all
 RE=${RE:-}                      # bulk Reynolds number (U h/nu): velocity spectra in wall units in the plots (u_tau = RETAU/RE)
 OUT=${OUT:-$SLURM_SUBMIT_DIR/spectra}
-B=${B:-$HOME/converter}
+B=${B:-$HOME/converter_and_spectra}
 
 # ---- run
 [ -x $B/rsspec ] || { echo "$B/rsspec not found: build it (make in $B)"; exit 1; }

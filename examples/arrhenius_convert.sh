@@ -2,7 +2,7 @@
 #
 # Conversion of a large restart file on one Arrhenius node (the conversion is I/O bound; it needs only a few
 # hundred MB of memory, so a login node also works for small files). Edit the command at the bottom.
-# Submit from the directory with the files:  sbatch -A <your-account> $HOME/converter/examples/arrhenius_convert.sh
+# Submit from the directory with the files:  sbatch -A <your-account> $HOME/converter_and_spectra/examples/arrhenius_convert.sh
 #
 #SBATCH -J rsconv
 #SBATCH -p gpu
@@ -12,7 +12,7 @@
 #SBATCH --gpus-per-node=1
 #SBATCH -t 01:00:00
 
-RS=${RS:-$HOME/converter/rsconv}
+RS=${RS:-$HOME/converter_and_spectra/rsconv}
 cd $SLURM_SUBMIT_DIR
 $RS info data/restart
 

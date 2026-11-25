@@ -3,12 +3,12 @@
 # Convert an FDCHAN restart file (single or double precision) to a HiCHAN restart file (<name>.bin + <name>.hdr) on
 # one Arrhenius node, and print the lines for the HiCHAN input file.
 #
-# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter.git
-#                                          cd converter && make
+# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+#                                          cd converter_and_spectra && make
 # Set the variables below (or pass them on the command line), then submit from any directory:
-#   sbatch -A <your-account> $HOME/converter/examples/arrhenius_f2h.sh
+#   sbatch -A <your-account> $HOME/converter_and_spectra/examples/arrhenius_f2h.sh
 #   sbatch -A <your-account> --export=ALL,FDCHAN=/scratch/geert/fd_run/data/restart.bin,NZ=1920,DT=1.5e-3 \
-#          $HOME/converter/examples/arrhenius_f2h.sh
+#          $HOME/converter_and_spectra/examples/arrhenius_f2h.sh
 #
 #SBATCH -J f2h
 #SBATCH -p gpu
@@ -28,7 +28,7 @@ NSCAL=${NSCAL:-}      # keep only the first NSCAL scalars; empty: all
 STEP=${STEP:-0}       # step number for the HiCHAN header (FDCHAN files do not store it)
 DT=${DT:-1e-3}        # time step for the HiCHAN header (HiCHAN's first time step; FDCHAN files do not store it)
 GRID=${GRID:-"tanh 4.5 8"}  # grid_type grid_alpha fd_order for the HiCHAN header (information only)
-RS=${RS:-$HOME/converter/rsconv}
+RS=${RS:-$HOME/converter_and_spectra/rsconv}
 
 # ---- checks
 for f in $RS $FDCHAN; do

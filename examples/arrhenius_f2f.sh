@@ -3,11 +3,11 @@
 # Convert an FDCHAN restart file between single precision (fdchan_sp) and double precision (fdchan) on one
 # Arrhenius node, optionally to another nx or nz, and print the lines for the FDCHAN input file.
 #
-# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter.git
-#                                          cd converter && make
+# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+#                                          cd converter_and_spectra && make
 # Set the variables below (or pass them on the command line), then submit from any directory:
-#   sbatch -A <your-account> $HOME/converter/examples/arrhenius_f2f.sh
-#   sbatch -A <your-account> --export=ALL,IN=/scratch/geert/fd_sp/data/restart.bin $HOME/converter/examples/arrhenius_f2f.sh
+#   sbatch -A <your-account> $HOME/converter_and_spectra/examples/arrhenius_f2f.sh
+#   sbatch -A <your-account> --export=ALL,IN=/scratch/geert/fd_sp/data/restart.bin $HOME/converter_and_spectra/examples/arrhenius_f2f.sh
 #
 #SBATCH -J f2f
 #SBATCH -p gpu
@@ -24,7 +24,7 @@ OUT=${OUT:-$(dirname $IN)/restart_$PREC.bin}             # FDCHAN restart file t
 NZ=${NZ:-}            # z-points of the output; empty: as the input (no change in z)
 NX=${NX:-}            # nx of the output; empty: as the input
 NSCAL=${NSCAL:-}      # keep only the first NSCAL scalars; empty: all
-RS=${RS:-$HOME/converter/rsconv}
+RS=${RS:-$HOME/converter_and_spectra/rsconv}
 
 # ---- checks
 for f in $RS $IN; do

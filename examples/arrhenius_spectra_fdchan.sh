@@ -8,12 +8,12 @@
 # Everything is taken from the run directory if not set: the samples, the y-grid and Re (from the input file; FDCHAN
 # restart files do not contain the grid), Re_tau (the mean of log.dat over the time of the samples).
 #
-# Build once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter.git
-#                            cd converter && make
+# Build once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+#                            cd converter_and_spectra && make
 # Submit from any directory:
-#   sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run $HOME/converter/examples/arrhenius_spectra_fdchan.sh
+#   sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run $HOME/converter_and_spectra/examples/arrhenius_spectra_fdchan.sh
 #   sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run,YPLUS="10,20,50,100,300,1000",TMIN=500 \
-#          $HOME/converter/examples/arrhenius_spectra_fdchan.sh
+#          $HOME/converter_and_spectra/examples/arrhenius_spectra_fdchan.sh
 #
 #SBATCH -J spectra_fdchan
 #SBATCH -p gpu
@@ -40,7 +40,7 @@ GRID=${GRID:-}                         # "type alpha"; default: grid_type, grid_
 SYM=${SYM:-1}                          # 1: average over both channel halves
 FIELDS=${FIELDS:-}                     # e.g. u,v,w,s1; empty: all
 OUT=${OUT:-$RUN/spectra}
-B=${B:-$HOME/converter}
+B=${B:-$HOME/converter_and_spectra}
 
 [ -x $B/rsspec ] || { echo "$B/rsspec not found: build it (make in $B)"; exit 1; }
 # value of an item of the FDCHAN input file ("key = value", ! comments)

@@ -1,4 +1,4 @@
-# converter: restart files between HiCHAN and FDCHAN, and their spectra
+# converter_and_spectra: restart files between HiCHAN and FDCHAN, and their spectra
 
 Two programs:
 
@@ -13,17 +13,31 @@ Two programs:
 * to a **different resolution in x and z** (`--nx`, `--nz`, any of the conversions, also HiCHAN → HiCHAN with
   `h2h`), by spectral interpolation (zero padding or truncation of the Fourier modes).
 
-It is one C++17 file without libraries (its own FFT for any length), works on one y-plane at a time (a few
-hundred MB of memory for production files) and uses threads over the kx-lines.
+Both are plain C++17 without libraries (their own FFT for any length, `src/rsio.hpp`), work on one y-plane at a
+time (a few hundred MB of memory for production files) and use threads over the kx-lines.
 
-## Compile
+## Get and compile
 
 Any C++17 compiler, on a login node:
 
 ```bash
-cd $HOME/converter
+cd $HOME
+git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+cd converter_and_spectra
 make
 ```
+
+The repository was called `converter` before. A clone under the old name keeps working (GitHub redirects), but
+the job scripts look for `$HOME/converter_and_spectra`; rename the old clone and point it to the new name:
+
+```bash
+mv $HOME/converter $HOME/converter_and_spectra
+cd $HOME/converter_and_spectra
+git remote set-url origin https://github.com/GeertBrethouwer/converter_and_spectra.git
+git pull
+```
+
+(or set `B=` / `RS=` to the directory when submitting a job script).
 
 This gives `./rsconv` and `./rsspec`. With another compiler: `make CXX=clang++` (or `CXX=nvc++` from the NVIDIA HPC SDK
 module).
@@ -102,7 +116,7 @@ Large files, as a batch job on one Arrhenius node:
   Settings as variables at the top or on the command line:
 
   ```bash
-  sbatch -A <your-account> --export=ALL,HICHAN=/scratch/geert/run/data/restart,NZ=2688 $HOME/converter/examples/arrhenius_h2f.sh
+  sbatch -A <your-account> --export=ALL,HICHAN=/scratch/geert/run/data/restart,NZ=2688 $HOME/converter_and_spectra/examples/arrhenius_h2f.sh
   ```
 
   `HICHAN` the HiCHAN restart (without extension), `OUT` the FDCHAN file (default `restart_fdchan.bin` next to
@@ -112,7 +126,7 @@ Large files, as a batch job on one Arrhenius node:
   `&scalars` lines for the HiCHAN input file:
 
   ```bash
-  sbatch -A <your-account> --export=ALL,FDCHAN=/scratch/geert/fd_run/data/restart.bin,NZ=1920,DT=1.5e-3 $HOME/converter/examples/arrhenius_f2h.sh
+  sbatch -A <your-account> --export=ALL,FDCHAN=/scratch/geert/fd_run/data/restart.bin,NZ=1920,DT=1.5e-3 $HOME/converter_and_spectra/examples/arrhenius_f2h.sh
   ```
 
   `FDCHAN` the FDCHAN file, `OUT` the HiCHAN restart name (default `restart_hichan` next to it), `NZ` (even),
@@ -121,7 +135,7 @@ Large files, as a batch job on one Arrhenius node:
 * `examples/arrhenius_f2f.sh`: FDCHAN single ↔ double precision (optionally another nx, nz):
 
   ```bash
-  sbatch -A <your-account> --export=ALL,IN=/scratch/geert/fd_sp/data/restart.bin $HOME/converter/examples/arrhenius_f2f.sh
+  sbatch -A <your-account> --export=ALL,IN=/scratch/geert/fd_sp/data/restart.bin $HOME/converter_and_spectra/examples/arrhenius_f2f.sh
   ```
 
   `IN` the FDCHAN file, `PREC` the output precision (default `double`; `single` for fdchan_sp), `OUT` (default
@@ -186,7 +200,7 @@ wall units.
 On Arrhenius, `examples/arrhenius_spectra.sh` does both as a batch job:
 
 ```bash
-sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,RE=20000,GRID="tanh 4.5" $HOME/converter/examples/arrhenius_spectra.sh
+sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,RE=20000,GRID="tanh 4.5" $HOME/converter_and_spectra/examples/arrhenius_spectra.sh
 ```
 
 with `YPLUS` (default `5,15,30,100,200`; or `Y`, `J`), `SYM` (default 1), `FIELDS`, `OUT` (default `spectra` in
@@ -195,7 +209,7 @@ the submit directory). If python3 with matplotlib is not available on the node i
 For a HiCHAN run, `examples/arrhenius_spectra_hichan.sh` needs only the run directory:
 
 ```bash
-sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/hichan_run $HOME/converter/examples/arrhenius_spectra_hichan.sh
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/hichan_run $HOME/converter_and_spectra/examples/arrhenius_spectra_hichan.sh
 ```
 
 It takes the time samples `data/samples/restart_t*` (from `tout_samples`/`iout_samples` in `&output`), or
@@ -208,7 +222,7 @@ times of the samples. Optional: `TMIN`, `TMAX` (only samples in this time range,
 For an FDCHAN run, `examples/arrhenius_spectra_fdchan.sh` does the same:
 
 ```bash
-sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run $HOME/converter/examples/arrhenius_spectra_fdchan.sh
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run $HOME/converter_and_spectra/examples/arrhenius_spectra_fdchan.sh
 ```
 
 It takes the time samples `data/samples/restart_t*.bin` (from `tout_samples`/`iout_samples`), or

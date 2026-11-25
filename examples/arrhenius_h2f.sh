@@ -3,11 +3,11 @@
 # Convert a HiCHAN restart file to an FDCHAN restart file on one Arrhenius node, and print the lines for the
 # FDCHAN input file.
 #
-# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter.git
-#                                          cd converter && make
+# Build the converter once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
+#                                          cd converter_and_spectra && make
 # Set the variables below (or pass them on the command line), then submit from any directory:
-#   sbatch -A <your-account> $HOME/converter/examples/arrhenius_h2f.sh
-#   sbatch -A <your-account> --export=ALL,HICHAN=/scratch/geert/run/data/restart,NZ=2688 $HOME/converter/examples/arrhenius_h2f.sh
+#   sbatch -A <your-account> $HOME/converter_and_spectra/examples/arrhenius_h2f.sh
+#   sbatch -A <your-account> --export=ALL,HICHAN=/scratch/geert/run/data/restart,NZ=2688 $HOME/converter_and_spectra/examples/arrhenius_h2f.sh
 #
 #SBATCH -J h2f
 #SBATCH -p gpu
@@ -25,7 +25,7 @@ NZ=${NZ:-}            # FDCHAN z-points; empty: as HiCHAN's nz (Fourier modes). 
 NX=${NX:-}            # nx of the output; empty: as HiCHAN
 PREC=${PREC:-double}  # double (fdchan) or single (fdchan_sp)
 NSCAL=${NSCAL:-}      # keep only the first NSCAL scalars; empty: all
-RS=${RS:-$HOME/converter/rsconv}
+RS=${RS:-$HOME/converter_and_spectra/rsconv}
 
 # ---- checks
 H=${HICHAN%.bin}; H=${H%.hdr}
