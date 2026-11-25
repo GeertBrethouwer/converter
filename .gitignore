@@ -2,3 +2,4 @@ rsconv
 tests/test_fft
 *.tmp
 rsspec
+build/

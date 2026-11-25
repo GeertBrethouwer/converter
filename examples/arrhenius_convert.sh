@@ -14,6 +14,8 @@
 
 RS=${RS:-$HOME/converter_and_spectra/rsconv}
 cd $SLURM_SUBMIT_DIR
+# binaries for the processor of this node (rebuilt by make if they were built on another type, e.g. a login node)
+make -s -C $(dirname $RS) rsconv > /dev/null || { echo "building rsconv in $(dirname $RS) FAILED"; exit 1; }
 $RS info data/restart
 
 # HiCHAN -> FDCHAN, e.g. with 1.4x more z-points for the compact z-differences of FDCHAN:

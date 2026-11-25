@@ -39,6 +39,11 @@ git pull
 
 (or set `B=` / `RS=` to the directory when submitting a job script).
 
+**Processor type.** The binaries run only on the type of processor they were built for: the login nodes of
+Arrhenius are x86_64, the GH200 nodes ARM (aarch64). `make` remembers the type (`build/.arch`) and rebuilds when it
+is run on the other one, and every job script runs `make` first on the node it runs on, so a job always has the
+right binaries (a few seconds). `make` / `make test` on the login node gives x86 binaries for tests there.
+
 This gives `./rsconv` and `./rsspec`. With another compiler: `make CXX=clang++` (or `CXX=nvc++` from the NVIDIA HPC SDK
 module).
 

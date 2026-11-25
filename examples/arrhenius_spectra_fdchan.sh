@@ -42,6 +42,8 @@ FIELDS=${FIELDS:-}                     # e.g. u,v,w,s1; empty: all
 OUT=${OUT:-$RUN/spectra}
 B=${B:-$HOME/converter_and_spectra}
 
+# binaries for the processor of this node (rebuilt by make if they were built on another type, e.g. a login node)
+make -s -C $B rsspec > /dev/null || { echo "building rsspec in $B FAILED"; exit 1; }
 [ -x $B/rsspec ] || { echo "$B/rsspec not found: build it (make in $B)"; exit 1; }
 # value of an item of the FDCHAN input file ("key = value", ! comments)
 item() { [ -f "$INPUT" ] && sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*\([^!]*\).*/\1/p" $INPUT | tail -1 | sed 's/[[:space:]]*$//'; }

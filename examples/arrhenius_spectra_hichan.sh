@@ -42,6 +42,8 @@ OUT=${OUT:-$RUN/spectra}
 B=${B:-$HOME/converter_and_spectra}
 
 # ---- the samples
+# binaries for the processor of this node (rebuilt by make if they were built on another type, e.g. a login node)
+make -s -C $B rsspec > /dev/null || { echo "building rsspec in $B FAILED"; exit 1; }
 [ -x $B/rsspec ] || { echo "$B/rsspec not found: build it (make in $B)"; exit 1; }
 if [ -z "$SAMPLES" ]; then
   if ls $DATA/samples/restart_t*.hdr > /dev/null 2>&1; then SAMPLES="$DATA/samples/restart_t*"

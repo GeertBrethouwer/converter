@@ -29,6 +29,8 @@ RS=${RS:-$HOME/converter_and_spectra/rsconv}
 
 # ---- checks
 H=${HICHAN%.bin}; H=${H%.hdr}
+# binaries for the processor of this node (rebuilt by make if they were built on another type, e.g. a login node)
+make -s -C $(dirname $RS) rsconv > /dev/null || { echo "building rsconv in $(dirname $RS) FAILED"; exit 1; }
 for f in $RS $H.bin $H.hdr; do
   [ -e $f ] || { echo "not found: $f"; exit 1; }
 done

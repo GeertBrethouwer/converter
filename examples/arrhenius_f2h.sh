@@ -31,6 +31,8 @@ GRID=${GRID:-"tanh 4.5 8"}  # grid_type grid_alpha fd_order for the HiCHAN heade
 RS=${RS:-$HOME/converter_and_spectra/rsconv}
 
 # ---- checks
+# binaries for the processor of this node (rebuilt by make if they were built on another type, e.g. a login node)
+make -s -C $(dirname $RS) rsconv > /dev/null || { echo "building rsconv in $(dirname $RS) FAILED"; exit 1; }
 for f in $RS $FDCHAN; do
   [ -e $f ] || { echo "not found: $f"; exit 1; }
 done
