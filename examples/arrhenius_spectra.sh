@@ -11,9 +11,8 @@
 #   sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_*.bin",RETAU=1000,GRID="tanh 4.5" \
 #          $HOME/converter/examples/arrhenius_spectra.sh
 #
-# Time samples: FDCHAN writes numbered restart files with tout_samples (or iout_samples) in its input, e.g.
-# tout_samples = 5 -> data/samples/restart_t<time>.bin (FILES="<run>/data/samples/restart_t*.bin"). For HiCHAN keep
-# copies of data/restart.bin/.hdr after each job of a chain (its restart file is overwritten).
+# Time samples: FDCHAN and HiCHAN (&output) write numbered restart files with tout_samples (or iout_samples), e.g.
+# tout_samples = 5 -> data/samples/restart_t<time>.bin (HiCHAN also .hdr); FILES="<run>/data/samples/restart_t*.bin".
 #
 #SBATCH -J spectra
 #SBATCH -p gpu

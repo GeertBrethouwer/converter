@@ -168,9 +168,8 @@ kx kz E2 against λ (`tools/plot_spectra.py`).
 | `--threads N` | threads (default: all cores) |
 
 The nearest grid points are used; the actual y and y⁺ are printed. Several files are averaged (time samples): a
-run overwrites its restart file every `iout_restart` steps, so keep copies for averages: FDCHAN writes them itself
-with `tout_samples` (or `iout_samples`) into `data/samples/restart_t<time>.bin`; for HiCHAN copy `data/restart.*`
-after every job of a chain. Only the needed planes are read:
+run overwrites its restart file every `iout_restart` steps, so keep copies for averages: both codes write them
+with `tout_samples` (or `iout_samples`) into `data/samples/restart_t<time>.bin` (HiCHAN: `&output`, also `.hdr`). Only the needed planes are read:
 seconds even for production files.
 
 Plots (python3 with numpy and matplotlib):
