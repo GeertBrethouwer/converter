@@ -1,5 +1,5 @@
 # make            build ./rsconv and ./rsspec (any C++17 compiler; no libraries needed)
-# make test       FFT test, round-trip tests and spectra tests (python3 with numpy)
+# make test       FFT test, round-trip, spectra and slice tests (python3 with numpy; scipy for the slice test)
 #
 # The binaries run only on the processor type they were built for (e.g. x86_64 on a login node, aarch64 on the
 # GH200 nodes of Arrhenius): make rebuilds them when it is run on another type (build/.arch). The job scripts run
@@ -28,6 +28,7 @@ test: rsconv rsspec tests/test_fft
 	./tests/test_fft
 	python3 tests/test_roundtrip.py ./rsconv
 	python3 tests/test_spectra.py .
+	python3 tests/test_slices.py .
 
 clean:
 	rm -rf rsconv rsspec tests/test_fft build

@@ -5,6 +5,8 @@ Two programs:
 * `rsconv`: conversion of restart files (below);
 * `rsspec`: streamwise, spanwise and two-dimensional spectra of the velocities and scalars from restart files of
   either code (section [Spectra](#spectra-rsspec)).
+* `tools/slices.py`: 2D slices (xz-, xy-, yz-planes) of the velocities and scalars from restart files of either
+  code, for visualisation (section [Slices](#slices-toolsslicespy)).
 
 `rsconv` converts restart files
 
@@ -237,6 +239,52 @@ restart files do not contain the grid); and Re_τ as the mean of `log.dat` over 
 options as the HiCHAN script (`TMIN`, `TMAX`, `SAMPLES`, `YPLUS`/`Y`/`J`, `RETAU`, `RE`, `SYM`, `FIELDS`, `OUT`,
 `INPUT`, `DATA`), and `GRID="tanh 4.5"` to set the grid.
 
+## Slices (`tools/slices.py`)
+
+`tools/slices.py` (python3 with numpy; scipy for `.mat` files) extracts 2D slices of u, v, w and the scalars from
+a HiCHAN or FDCHAN restart file, single or double precision, as HiCHAN's `tools/restart_slices.py`:
+
+* xz-planes at given wall-normal positions (`--y`, or `--yplus` with `--retau`), arrays (Nz, Nx, n_y);
+* an xy-plane at `--z`, array (ny, Nx), and a yz-plane at `--x`, array (ny, Nz).
+
+The fields are evaluated exactly from their Fourier series at the grid points y_j, optionally on a finer x-z grid
+(`--upsample 2`: exact Fourier interpolation; for FDCHAN the z-points are transformed to their Fourier modes first,
+and `--upsample 1` gives exactly the stored z-point values). `--fluct` removes the x-z mean. The output is a
+MATLAB `.mat` file with the same contents as HiCHAN's (x, y, z, time, step, lx, lz, y_xz, z_xy, x_yz, fields,
+xz_<f>, xy_<f>, yz_<f>; for a HiCHAN file identical to the output of `restart_slices.py`), or a `.npz` file
+(`-o name.npz`, or by default when scipy is missing).
+
+```bash
+python3 tools/slices.py data/restart --y -0.9 0 --z 1.0 --x 2.0 --fluct                         # HiCHAN
+python3 tools/slices.py data/restart.bin --grid tanh 4.5 --yplus 15 100 --retau 1000 --upsample 2 --fluct -o s.mat   # FDCHAN
+```
+
+FDCHAN restart files do not contain the y-grid: give `--grid TYPE ALPHA` (`grid_type`, `grid_alpha` of the
+input; FDCHAN's default is `tanh 3.0`) or `--grid-file`. Other options: `--fields u v s1`, `--re` and `--utau`
+(instead of `--retau`, as in HiCHAN's script). Only the xz-planes are transformed as a whole; of the other y-planes
+only the two lines of the xy- and yz-planes are computed: at 2560 × 385 × 1920 about 0.2 s per plane and field
+for an FDCHAN file (less for HiCHAN), a few minutes for all fields.
+
+Pictures:
+
+```bash
+python3 tools/plot_slices.py s.mat            # (or .npz) s_<field>.png, one figure per field
+```
+
+`tools/plot_slices.py` (matplotlib) draws, per field, the xz-planes in the top row and the xy- and yz-plane below
+(options `--fields`, `--clim lo hi`, `--plane xz|xy|yz`); `tools/plot_slices.m` (copied from HiCHAN) does the same
+in MATLAB or Octave: `plot_slices('s.mat')`, `plot_slices('s.mat', {'u','s1'}, 'save', true, 'clim', [-0.3 0.3])`.
+
+On Arrhenius, `examples/arrhenius_slices.sh` does both as a batch job:
+
+```bash
+sbatch -A <your-account> --export=ALL,FILE=/scratch/geert/fdchan_run/data/restart.bin,RUN=/scratch/geert/fdchan_run,YPLUS="15 100" $HOME/converter_and_spectra/examples/arrhenius_slices.sh
+```
+
+with `FILE` (FDCHAN `.bin` or HiCHAN restart name), `RUN` (optional: the FDCHAN grid from `RUN/input.txt` and Re_τ
+from `RUN/data/log.dat`), `GRID`, `YPLUS` + `RETAU` or `Y` (default `"-0.9 0"`), `X`, `Z`, `UPSAMPLE`, `FLUCT`
+(default 1), `FIELDS`, `OUT`, `PLOT` (default 1).
+
 ## What the conversion does
 
 Both codes represent a field by its Fourier coefficients in x, f(x, ·) = Σ f̂ exp(i kx x) over kx = 2πi/lx,
@@ -291,3 +339,4 @@ Things to know:
 | FDCHAN turbulent field (32 × 65 × 48, one scalar, 300 steps) → f2h → HiCHAN (CPU build) | HiCHAN's first log line: τ_w, Re_τ, dS/dy at both walls identical to FDCHAN's last; U_b 1.000007 (Nyquist energy dropped, coarse grid); div_max 0.34, then 1e-14 after one step |
 | HiCHAN turbulent field (same grid, 300 steps) → h2f → FDCHAN | FDCHAN's first log line: U_b, τ_w, Re_τ, dS/dy identical to HiCHAN's last; div_max 7e-15; E_kin within 0.1 % |
 | `tests/test_spectra.py`: rsspec against numpy from the physical field (random HiCHAN file, two scalars) | variance, Ex (FFTs in x), Ez (FFTs in z), E2: to the 9 digits of the output; FDCHAN file of the same field: the same spectra; single precision: 3e-8; two files: their average; `--sym`, `--yplus`, `--y`, the means |
+| `tests/test_slices.py`: slices.py on a random HiCHAN file against a direct evaluation of the Fourier series (`--upsample` 1 and 1.5, `--fluct`); the FDCHAN file of the same field (double, single precision); an FDCHAN file with odd nz and with Nyquist content (stored z-values reproduced, `--upsample 2`); positions, `.npz`, plot_slices.py | 4e-15 (single precision 4e-8); on a HiCHAN restart identical to HiCHAN's restart_slices.py |
