@@ -205,6 +205,19 @@ times of the samples. Optional: `TMIN`, `TMAX` (only samples in this time range,
 `SAMPLES` (other files, globs work), `YPLUS` (default `5,15,30,100,200`; or `Y`, `J`), `RETAU`, `RE`, `SYM`,
 `FIELDS`, `OUT` (default `RUN/spectra`), `INPUT`, `DATA`, `YFILE`.
 
+For an FDCHAN run, `examples/arrhenius_spectra_fdchan.sh` does the same:
+
+```bash
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run $HOME/converter/examples/arrhenius_spectra_fdchan.sh
+```
+
+It takes the time samples `data/samples/restart_t*.bin` (from `tout_samples`/`iout_samples`), or
+`data/restart.bin` if there are none (single or double precision); `data_dir`, the y-grid (`grid_type`,
+`grid_alpha`; FDCHAN's defaults tanh 3.0 if not given) and Re from the input file (`RUN/input.txt`, since FDCHAN
+restart files do not contain the grid); and Re_τ as the mean of `log.dat` over the times of the samples. The same
+options as the HiCHAN script (`TMIN`, `TMAX`, `SAMPLES`, `YPLUS`/`Y`/`J`, `RETAU`, `RE`, `SYM`, `FIELDS`, `OUT`,
+`INPUT`, `DATA`), and `GRID="tanh 4.5"` to set the grid.
+
 ## What the conversion does
 
 Both codes represent a field by its Fourier coefficients in x, f(x, ·) = Σ f̂ exp(i kx x) over kx = 2πi/lx,
