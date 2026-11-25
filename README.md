@@ -192,6 +192,19 @@ sbatch -A <your-account> --export=ALL,FILES="/scratch/geert/run/samples/restart_
 with `YPLUS` (default `5,15,30,100,200`; or `Y`, `J`), `SYM` (default 1), `FIELDS`, `OUT` (default `spectra` in
 the submit directory). If python3 with matplotlib is not available on the node it prints the plot command.
 
+For a HiCHAN run, `examples/arrhenius_spectra_hichan.sh` needs only the run directory:
+
+```bash
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/hichan_run $HOME/converter/examples/arrhenius_spectra_hichan.sh
+```
+
+It takes the time samples `data/samples/restart_t*` (from `tout_samples`/`iout_samples` in `&output`), or
+`data/restart` if there are none; the y-grid from the restart headers (a `grid_type = 'file'` grid from
+`grid_file` of the input); Re from the input file (`*.nml` in `RUN`); and Re_τ as the mean of `log.dat` over the
+times of the samples. Optional: `TMIN`, `TMAX` (only samples in this time range, e.g. after the transient),
+`SAMPLES` (other files, globs work), `YPLUS` (default `5,15,30,100,200`; or `Y`, `J`), `RETAU`, `RE`, `SYM`,
+`FIELDS`, `OUT` (default `RUN/spectra`), `INPUT`, `DATA`, `YFILE`.
+
 ## What the conversion does
 
 Both codes represent a field by its Fourier coefficients in x, f(x, ·) = Σ f̂ exp(i kx x) over kx = 2πi/lx,
