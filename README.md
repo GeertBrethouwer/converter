@@ -285,6 +285,23 @@ with `FILE` (FDCHAN `.bin` or HiCHAN restart name), `RUN` (optional: the FDCHAN 
 from `RUN/data/log.dat`), `GRID`, `YPLUS` + `RETAU` or `Y` (default `"-0.9 0"`), `X`, `Z`, `UPSAMPLE`, `FLUCT`
 (default 1), `FIELDS`, `OUT`, `PLOT` (default 1).
 
+For a whole run, `examples/arrhenius_slices_hichan.sh` and `examples/arrhenius_slices_fdchan.sh` need only the run
+directory, as the spectra scripts:
+
+```bash
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/hichan_run $HOME/converter_and_spectra/examples/arrhenius_slices_hichan.sh
+sbatch -A <your-account> --export=ALL,RUN=/scratch/geert/fdchan_run,WHICH=all,TMIN=500,YPLUS="15 100",CLIM="-0.3 0.3" $HOME/converter_and_spectra/examples/arrhenius_slices_fdchan.sh
+```
+
+`WHICH=last` (default): the latest time sample (`data/samples/restart_t*`), else the restart file; `WHICH=all`:
+every sample with `TMIN` ≤ t ≤ `TMAX` (frames, e.g. for a film: set `CLIM` for the same colour range in all
+pictures); `WHICH=restart`: `data/restart`. They write `RUN/slices/<file>_slices.mat` (`FORMAT=npz`, or
+automatically without scipy) and the png pictures (`<file>_slices_<field>.png`). The y-grid comes from the HiCHAN
+headers (`grid_type = 'file'`: `grid_file` of the input), for FDCHAN from `RUN/input.txt` (with `data_dir`;
+`GRID` to set it); Re_τ for `YPLUS` from `log.dat` at the time of each file (or `RETAU`). Other settings: `Y`
+(default `"-0.9 0"`), `X`, `Z`, `UPSAMPLE`, `FLUCT` (default 1), `FIELDS`, `SAMPLES`, `OUTDIR` (default
+`RUN/slices`), `PLOT`.
+
 ## What the conversion does
 
 Both codes represent a field by its Fourier coefficients in x, f(x, ·) = Σ f̂ exp(i kx x) over kx = 2πi/lx,
