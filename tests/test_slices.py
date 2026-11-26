@@ -8,7 +8,8 @@
   * FDCHAN file of the same field (rsconv h2f): the same slices; single precision: round-off
   * FDCHAN file with an odd nz and kz-Nyquist content (written directly): at --upsample 1 the stored z-point values
     are reproduced exactly; --upsample 2 at the even points gives the same values
-  * --yplus/--retau, --y, --x, --z positions; .npz output; tools/plot_slices.py runs (if matplotlib is there)
+  * --yplus/--retau, --y, --x, --z positions; .npz output; tools/plot_slices.py (clean pictures, colour maps from a
+    directory, --annotated; if matplotlib is there)
 """
 import os, subprocess, sys, tempfile
 import numpy as np
@@ -157,10 +158,24 @@ with tempfile.TemporaryDirectory() as d:
     check("--yplus 10 100 --retau 180 (.npz output): nearest grid points", float(sorted(Z["j_xz"] - 1) != want), 0.5)
     try:
         import matplotlib  # noqa
-        run([sys.executable, os.path.join(T, "plot_slices.py"), "p.npz", "--fields", "u", "s1"])
-        run([sys.executable, os.path.join(T, "plot_slices.py"), "s.mat", "--plane", "xz"])
-        check("tools/plot_slices.py (.npz and .mat): the png files", float(not (os.path.exists("p_u.png") and
-              os.path.exists("p_s1.png") and os.path.exists("s_w.png"))), 0.5)
+        # stand-ins for the Scientific Colour Maps (the real ones: tools/install_scientific_colourmaps.sh), in the
+        # layout of the official collection
+        for name in ("vik", "batlow"):
+            os.makedirs(f"scm/{name}", exist_ok=True)
+            np.savetxt(f"scm/{name}/{name}.txt", np.linspace(0, 1, 256)[:, None] * np.ones(3))
+        run([sys.executable, os.path.join(T, "plot_slices.py"), "p.npz", "--fields", "u", "s1", "--cmap-dir", "scm", "--size", "300"])
+        run([sys.executable, os.path.join(T, "plot_slices.py"), "s.mat", "--plane", "xz", "--cmap-dir", "scm", "--size", "300"])
+        run([sys.executable, os.path.join(T, "plot_slices.py"), "p.npz", "--fields", "v", "--cmap-dir", "scm", "--annotated"])
+        want = ["p_u_xz1.png", "p_u_xz2.png", "p_u_xy.png", "p_u_yz.png", "p_s1_xy.png", "s_w_xz1.png", "s_w_xz2.png",
+                "p_v.png", "p_clim.txt"]
+        check("tools/plot_slices.py (.npz, .mat, --annotated): the png files and _clim.txt",
+              float(not all(os.path.exists(f) for f in want) or os.path.exists("s_w_xy.png")), 0.5)
+        from PIL import Image
+        w, h = Image.open("p_u_xy.png").size
+        check("clean picture of the xy-plane: aspect lx : 2", abs(w / h - lx / 2) / (lx / 2), 0.02)
+        r = subprocess.run([sys.executable, os.path.join(T, "plot_slices.py"), "p.npz", "--cmap-dir", "scm", "--cmap", "nomap"],
+                           capture_output=True, text=True, env=dict(os.environ, HOME=d, SCIENTIFIC_COLOURMAPS=""))
+        check("an unknown colour map: refused", float(r.returncode == 0), 0.5)
     except ImportError:
         print("  (no matplotlib: tools/plot_slices.py not tested)")
 

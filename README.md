@@ -268,12 +268,33 @@ for an FDCHAN file (less for HiCHAN), a few minutes for all fields.
 Pictures:
 
 ```bash
-python3 tools/plot_slices.py s.mat            # (or .npz) s_<field>.png, one figure per field
+python3 tools/plot_slices.py s.mat            # (or .npz) clean pictures of every plane
 ```
 
-`tools/plot_slices.py` (matplotlib) draws, per field, the xz-planes in the top row and the xy- and yz-plane below
-(options `--fields`, `--clim lo hi`, `--plane xz|xy|yz`); `tools/plot_slices.m` (copied from HiCHAN) does the same
-in MATLAB or Octave: `plot_slices('s.mat')`, `plot_slices('s.mat', {'u','s1'}, 'save', true, 'clim', [-0.3 0.3])`.
+`tools/plot_slices.py` (matplotlib) writes every plane as a clean picture, without colour bar, axes, title or
+margins, with the aspect ratio of the plane (the longer side `--size` pixels, default 2000):
+`s_<field>_xz1.png`, `s_<field>_xz2.png`, ... (the stored wall distances in order), `s_<field>_xy.png`,
+`s_<field>_yz.png`. The colour range of every field is written to `s_clim.txt`; `--clim lo hi` fixes it (the same
+for a series of frames). Other options: `--fields`, `--plane xz|xy|yz`, `--shading gouraud|nearest` (smooth
+between the grid points, default, or one colour per point), `--annotated` (one figure per field with titles, axes
+and colour bars, to read off values).
+
+The colours are the [Scientific Colour Maps](https://www.fabiocrameri.ch/colourmaps) of Fabio Crameri
+(doi:10.5281/zenodo.1243862): `--cmap-div` (default `vik`) for fields with both signs (fluctuations, v, w),
+`--cmap` (default `batlow`) otherwise; any map of the collection (`roma`, `berlin`, `broc`, `cork`, `lajolla`,
+`oslo`, ...; reversed: `vik_r`). Install them once:
+
+```bash
+bash tools/install_scientific_colourmaps.sh $HOME/scientific_colourmaps
+```
+
+This installs the maps of the Python package `cmcrameri` (PyPI, without its dependencies: numpy and matplotlib are
+not touched) and, if Zenodo can be reached, the official collection with the maps for MATLAB, GMT, ParaView, etc.
+`plot_slices.py` finds the maps in `--cmap-dir DIR`, `$SCIENTIFIC_COLOURMAPS`, `~/scientific_colourmaps` or
+`/scratch/geert/scientific_colourmaps` (or an installed `cmcrameri` package).
+
+`tools/plot_slices.m` (copied from HiCHAN) draws annotated figures in MATLAB or Octave:
+`plot_slices('s.mat')`, `plot_slices('s.mat', {'u','s1'}, 'save', true, 'clim', [-0.3 0.3])`.
 
 On Arrhenius, `examples/arrhenius_slices.sh` does both as a batch job:
 
@@ -283,7 +304,7 @@ sbatch -A <your-account> --export=ALL,FILE=/scratch/geert/fdchan_run/data/restar
 
 with `FILE` (FDCHAN `.bin` or HiCHAN restart name), `RUN` (optional: the FDCHAN grid from `RUN/input.txt` and Re_τ
 from `RUN/data/log.dat`), `GRID`, `YPLUS` + `RETAU` or `Y` (default `"-0.9 0"`), `X`, `Z`, `UPSAMPLE`, `FLUCT`
-(default 1), `FIELDS`, `OUT`, `PLOT` (default 1).
+(default 1), `FIELDS`, `OUT`, `PLOT` (default 1), `SCM`, `CMAP`, `CMAP_DIV`, `CLIM`.
 
 For a whole run, `examples/arrhenius_slices_hichan.sh` and `examples/arrhenius_slices_fdchan.sh` need only the run
 directory, as the spectra scripts:
@@ -300,7 +321,7 @@ automatically without scipy) and the png pictures (`<file>_slices_<field>.png`).
 headers (`grid_type = 'file'`: `grid_file` of the input), for FDCHAN from `RUN/input.txt` (with `data_dir`;
 `GRID` to set it); Re_τ for `YPLUS` from `log.dat` at the time of each file (or `RETAU`). Other settings: `Y`
 (default `"-0.9 0"`), `X`, `Z`, `UPSAMPLE`, `FLUCT` (default 1), `FIELDS`, `SAMPLES`, `OUTDIR` (default
-`RUN/slices`), `PLOT`.
+`RUN/slices`), `PLOT`, `SCM` (directory of the colour maps), `CMAP`, `CMAP_DIV`.
 
 ## What the conversion does
 

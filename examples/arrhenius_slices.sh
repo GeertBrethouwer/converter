@@ -2,8 +2,8 @@
 #
 # 2D slices (xz-planes at chosen wall distances, an xy- and a yz-plane) of u, v, w and the scalars from a HiCHAN or
 # FDCHAN restart file (single or double precision) on one Arrhenius node, for visualisation: a .mat file (MATLAB /
-# Octave: tools/plot_slices.m; needs scipy) or a .npz file, and png pictures with tools/plot_slices.py (if
-# matplotlib is available).
+# Octave: tools/plot_slices.m; needs scipy) or a .npz file, and clean png pictures of every plane with
+# tools/plot_slices.py (matplotlib; Scientific Colour Maps, tools/install_scientific_colourmaps.sh).
 #
 # Get the code once (login node):   cd $HOME && git clone https://github.com/GeertBrethouwer/converter_and_spectra.git
 # Needs python3 with numpy (scipy for .mat files, matplotlib for the pictures).
@@ -36,6 +36,10 @@ FLUCT=${FLUCT:-1}       # 1: fluctuations (the x-z mean removed)
 FIELDS=${FIELDS:-}      # e.g. "u v s1"; empty: all
 OUT=${OUT:-}            # output file .mat or .npz; default: <restart>_slices.mat (.npz without scipy)
 PLOT=${PLOT:-1}         # 1: png pictures with tools/plot_slices.py
+SCM=${SCM:-}            # directory of the Scientific Colour Maps (default: $SCIENTIFIC_COLOURMAPS, ~/scientific_colourmaps)
+CMAP=${CMAP:-}          # colour map for fields of one sign (default batlow), CMAP_DIV for signed fields (default vik)
+CMAP_DIV=${CMAP_DIV:-}
+CLIM=${CLIM:-}          # fixed colour range, e.g. "-0.3 0.3"
 B=${B:-$HOME/converter_and_spectra}
 
 # ---- checks
@@ -77,7 +81,7 @@ outf=$(awk '/^wrote/ {print $2}' $log); rm -f $log
 # ---- pictures
 if [ "$PLOT" = 1 ] && [ -n "$outf" ]; then
   if python3 -c "import matplotlib" 2>/dev/null; then
-    python3 $B/tools/plot_slices.py $outf ${FIELDS:+--fields $FIELDS}
+    python3 $B/tools/plot_slices.py $outf ${FIELDS:+--fields $FIELDS} ${SCM:+--cmap-dir $SCM} ${CMAP:+--cmap $CMAP} ${CMAP_DIV:+--cmap-div $CMAP_DIV} ${CLIM:+--clim $CLIM}
   else
     echo "no python3 with matplotlib here: pictures later with  python3 $B/tools/plot_slices.py $outf"
   fi

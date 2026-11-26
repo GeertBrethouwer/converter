@@ -46,6 +46,10 @@ CLIM=${CLIM:-}                         # fixed colour range of the pictures, e.g
 FORMAT=${FORMAT:-mat}                  # mat (needs scipy) or npz
 OUTDIR=${OUTDIR:-$RUN/slices}
 PLOT=${PLOT:-1}                        # 1: png pictures
+SCM=${SCM:-}                           # directory of the Scientific Colour Maps (default: $SCIENTIFIC_COLOURMAPS,
+                                       #   ~/scientific_colourmaps; tools/install_scientific_colourmaps.sh)
+CMAP=${CMAP:-}                         # colour map for fields of one sign (default batlow)
+CMAP_DIV=${CMAP_DIV:-}                 # colour map for signed fields (default vik)
 B=${B:-$HOME/converter_and_spectra}
 
 # ---- checks
@@ -114,7 +118,7 @@ for h in $files; do
   echo "== $(basename $h .bin) (t = $t)${rt:+, Re_tau = $rt}"
   srun python3 $B/tools/slices.py $h $OPTS -o $out | sed 's/^/   /' || { echo "slices FAILED for $h"; exit 1; }
   if [ $plot = 1 ]; then
-    python3 $B/tools/plot_slices.py $out ${FIELDS:+--fields $FIELDS} ${CLIM:+--clim $CLIM} | sed 's/^/   /'
+    python3 $B/tools/plot_slices.py $out ${FIELDS:+--fields $FIELDS} ${SCM:+--cmap-dir $SCM} ${CMAP:+--cmap $CMAP} ${CMAP_DIV:+--cmap-div $CMAP_DIV} ${CLIM:+--clim $CLIM} | sed 's/^/   /'
   fi
 done
 echo "slices of $(echo $files | wc -w) file(s) in $OUTDIR, $(( $(date +%s) - start )) s"
