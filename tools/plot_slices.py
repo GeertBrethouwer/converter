@@ -169,9 +169,17 @@ for f in fields:
     plt.close(fig)
     print("wrote", png)
 
+# <base>_clim.txt: the ranges of the fields of this call, merged with those of earlier calls for other fields
+old = {}
+if os.path.exists(base + "_clim.txt"):
+    for l in open(base + "_clim.txt"):
+        if l.strip() and not l.startswith("#"):
+            old[l.split()[0]] = l
+for f, lo, hi, n in clims:
+    old[f] = "%-4s %15.7e %15.7e  %s\n" % (f, lo, hi, n)
 with open(base + "_clim.txt", "w") as o:
     o.write("# colour range of the pictures of %s (t = %.8g): field, min, max, colour map\n" % (os.path.basename(a.file), sc("time")))
-    for f, lo, hi, n in clims:
-        o.write("%-4s %15.7e %15.7e  %s\n" % (f, lo, hi, n))
+    for f in sorted(old, key=lambda k: (k[0] != "u", k[0] != "v", k[0] != "w", k)):
+        o.write(old[f])
 for f, lo, hi, n in clims:
     print("  %-4s colour range %12.5e .. %12.5e (%s)" % (f, lo, hi, n))

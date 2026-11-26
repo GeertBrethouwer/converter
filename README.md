@@ -293,6 +293,20 @@ not touched) and, if Zenodo can be reached, the official collection with the map
 `plot_slices.py` finds the maps in `--cmap-dir DIR`, `$SCIENTIFIC_COLOURMAPS`, `~/scientific_colourmaps` or
 `/scratch/geert/scientific_colourmaps` (or an installed `cmcrameri` package).
 
+`examples/pictures_slices.sh` makes the pictures of many slice files at once, on a desktop or as a job:
+
+```bash
+SLICES="/data/fdchan_run/slices" CMAP_DIV=vik bash $HOME/converter_and_spectra/examples/pictures_slices.sh
+sbatch -A <your-account> --export=ALL,SLICES="/scratch/geert/fdchan_run/slices/*.mat" $HOME/converter_and_spectra/examples/pictures_slices.sh
+```
+
+It installs the colour maps into `SCM` (default `/scratch/geert/scientific_colourmaps`) if they are not there
+(needs internet), and gives every field the same colour range in all files (`COMMON=1`, default; symmetric for
+signed fields), so that a series of frames (e.g. from `WHICH=all`) can be compared or made into a film; the
+ranges are written to `common_clim.txt`. Settings: `SLICES` (files, globs or a directory), `CMAP_DIV` (default
+`vik`), `CMAP` (default `batlow`), `FIELDS`, `PLANE`, `CLIM` (one fixed range instead), `SIZE` (default 2000),
+`SHADING`, `OUTDIR` (default: next to the slice files).
+
 `tools/plot_slices.m` (copied from HiCHAN) draws annotated figures in MATLAB or Octave:
 `plot_slices('s.mat')`, `plot_slices('s.mat', {'u','s1'}, 'save', true, 'clim', [-0.3 0.3])`.
 
