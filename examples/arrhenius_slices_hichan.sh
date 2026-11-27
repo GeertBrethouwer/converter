@@ -73,7 +73,7 @@ if [ -z "$SAMPLES" ]; then
   esac
 fi
 files=""
-for h in $(for p in $SAMPLES; do ls -d $p $p.hdr; done 2>/dev/null | sed -E 's/\.(bin|hdr)$//' | sort -u); do
+for h in $(for p in $SAMPLES; do ls -d $p $p.hdr; done 2>/dev/null | sed -E 's/\.(bin|hdr|stats)$//' | sort -u); do
   [ -f $h.hdr ] && [ -f $h.bin ] || continue
   t=$(tof $h)
   if [ -n "$TMIN" ] && awk -v t=$t -v a=$TMIN 'BEGIN{exit !(t < a)}'; then continue; fi

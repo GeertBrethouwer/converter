@@ -50,7 +50,7 @@ if [ -z "$SAMPLES" ]; then
   else SAMPLES="$DATA/restart"; fi
 fi
 files=""
-for h in $(for p in $SAMPLES; do ls -d $p $p.hdr; done 2>/dev/null | sed -E 's/\.(bin|hdr)$//' | sort -u); do
+for h in $(for p in $SAMPLES; do ls -d $p $p.hdr; done 2>/dev/null | sed -E 's/\.(bin|hdr|stats)$//' | sort -u); do
   [ -f $h.hdr ] && [ -f $h.bin ] || { echo "skipped $h (no .hdr/.bin pair)"; continue; }
   t=$(awk 'NR==4{print $1}' $h.hdr)
   if [ -n "$TMIN" ] && awk -v t=$t -v a=$TMIN 'BEGIN{exit !(t < a)}'; then continue; fi
